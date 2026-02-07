@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KAM Theory — Harmonic Accumulation at Criticality</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0f;
+    color: #c8c8d0;
+    font-family: 'Courier New', monospace;
+    overflow-x: hidden;
+  }
+  .header {
+    text-align: center;
+    padding: 40px 20px 20px;
+    border-bottom: 1px solid #1a1a2e;
+  }
+  .header h1 {
+    font-size: 1.8em;
+    color: #e8d5b7;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+  .header .subtitle {
+    font-size: 0.9em;
+    color: #6a6a7a;
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .panel {
+    border: 1px solid #1a1a2e;
+    padding: 20px;
+    position: relative;
+    min-height: 420px;
+  }
+  .panel h2 {
+    font-size: 0.85em;
+    color: #8a8aaa;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 4px;
+  }
+  .panel .description {
+    font-size: 0.75em;
+    color: #4a4a5a;
+    margin-bottom: 12px;
+    line-height: 1.4;
+  }
+  .panel canvas {
+    display: block;
+    width: 100%;
+  }
+  .full-width {
+    grid-column: 1 / -1;
+  }
+  .equation-bar {
+    text-align: center;
+    padding: 15px 20px;
+    background: #0d0d14;
+    border: 1px solid #1a1a2e;
+    grid-column: 1 / -1;
+    font-size: 0.85em;
+    color: #7a7a9a;
+    letter-spacing: 1px;
+  }
+  .equation-bar .eq {
+    color: #b8a88a;
+    font-size: 1.05em;
+  }
+  .legend {
+    position: absolute;
+    top: 70px;
+    right: 25px;
+    font-size: 0.7em;
+    line-height: 1.8;
+  }
+  .legend span {
+    display: inline-block;
+    width: 18px;
+    height: 3px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .narrative {
+    grid-column: 1 / -1;
+    padding: 30px 40px;
+    background: #0d0d14;
+    border: 1px solid #1a1a2e;
+    line-height: 1.7;
+    font-size: 0.82em;
+    color: #6a6a7a;
+  }
+  .narrative strong {
+    color: #b8a88a;
+  }
+  .narrative em {
+    color: #8a8aaa;
+    font-style: normal;
+  }
+  .controls {
+    position: absolute;
+    bottom: 15px;
+    right: 20px;
+    font-size: 0.65em;
+    color: #3a3a4a;
+  }
+  .controls button {
+    background: #1a1a2e;
+    border: 1px solid #2a2a3e;
+    color: #6a6a7a;
+    padding: 3px 10px;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    font-size: 1em;
+    margin-left: 4px;
+  }
+  .controls button:hover { background: #2a2a3e; color: #9a9aaa; }
+  .controls button.active { background: #2a2a3e; color: #b8a88a; border-color: #4a4a5a; }
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: 1fr; }
+    .full-width { grid-column: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>KAM Theory &amp; Harmonic Accumulation</h1>
+  <div class="subtitle">
+    The unique accumulation law compatible with persistent non-equilibrium dynamics.
+    At the critical Diophantine exponent τ = n, the resonance sum becomes the harmonic series,
+    and the system lives at the boundary between order and chaos — λ = 0.
+  </div>
+</div>
+
+<div class="grid">
+
+  <!-- Equation Bar -->
+  <div class="equation-bar">
+    <span class="eq">H(I, θ) = H₀(I) + εH₁(I, θ)</span>
+    &nbsp;&nbsp;|&nbsp;&nbsp;
+    <span class="eq">|⟨k, ω⟩| ≥ γ / |k|<sup>τ</sup></span>
+    &nbsp;&nbsp;|&nbsp;&nbsp;
+    <span class="eq">S(τ, n) = Σ<sub>j=1</sub><sup>∞</sup> j<sup>n−1−τ</sup></span>
+    &nbsp;&nbsp;|&nbsp;&nbsp;
+    <span class="eq">τ<sub>c</sub> = n</span>
+  </div>
+
+  <!-- Panel 1: Entropy Production Rate -->
+  <div class="panel" id="panel1">
+    <h2>I. Entropy Production Rate σ(t)</h2>
+    <div class="description">
+      The rate σ(t) = c/t<sup>α</sup> for three regimes. Only α = 1 balances persistence of motion with persistence of gradient.
+    </div>
+    <canvas id="canvas1" width="660" height="320"></canvas>
+    <div class="legend">
+      <span style="background:#c44040"></span>α = 0.6 (burns gradient)<br>
+      <span style="background:#d4a840"></span>α = 1.0 (harmonic — critical)<br>
+      <span style="background:#4080c0"></span>α = 1.5 (motion ceases)
+    </div>
+  </div>
+
+  <!-- Panel 2: Cumulative Entropy -->
+  <div class="panel" id="panel2">
+    <h2>II. Cumulative Entropy Production ∫σ(t)dt</h2>
+    <div class="description">
+      α &lt; 1: polynomial divergence (transient). α = 1: logarithmic divergence (sustained). α &gt; 1: convergent (frozen).
+    </div>
+    <canvas id="canvas2" width="660" height="320"></canvas>
+    <div class="legend">
+      <span style="background:#c44040"></span>T<sup>0.4</sup>/0.4 (polynomial)<br>
+      <span style="background:#d4a840"></span>ln(T) + γ (harmonic)<br>
+      <span style="background:#4080c0"></span>bounded (converges)
+    </div>
+  </div>
+
+  <!-- Panel 3: Resonance Sum / p-series -->
+  <div class="panel" id="panel3">
+    <h2>III. KAM Resonance Sum S(τ, n)</h2>
+    <div class="description">
+      S(τ,n) = Σ j<sup>n−1−τ</sup>. This is a p-series with p = τ − n + 1.
+      At τ = n (p = 1), it becomes the harmonic series.
+    </div>
+    <canvas id="canvas3" width="660" height="320"></canvas>
+    <div class="legend">
+      <span style="background:#c44040"></span>τ &lt; n: diverges (chaotic)<br>
+      <span style="background:#d4a840"></span>τ = n: harmonic (critical)<br>
+      <span style="background:#4080c0"></span>τ &gt; n: converges (ordered)
+    </div>
+    <div class="controls">
+      n = <button class="active" onclick="setDimension(2, this)">2</button>
+      <button onclick="setDimension(3, this)">3</button>
+      <button onclick="setDimension(4, this)">4</button>
+    </div>
+  </div>
+
+  <!-- Panel 4: Phase Diagram -->
+  <div class="panel" id="panel4">
+    <h2>IV. KAM Phase Diagram (ε vs τ)</h2>
+    <div class="description">
+      Regions of stability in perturbation strength ε and Diophantine exponent τ.
+      The critical line τ = n separates order from chaos. Golden ratio torus is the last to break.
+    </div>
+    <canvas id="canvas4" width="660" height="320"></canvas>
+  </div>
+
+  <!-- Narrative Break -->
+  <div class="narrative">
+    <strong>The Critical Insight:</strong> At the critical Diophantine exponent τ<sub>c</sub> = n, the resonance
+    accumulation sum becomes the harmonic series H<sub>K</sub> = Σ 1/j = ln(K) + γ + O(1/K).
+    The Euler-Mascheroni constant <em>γ ≈ 0.5772</em> measures the exact cost of discreteness —
+    the difference between the discrete lattice of resonances and the continuous integral approximation.
+    The golden mean <em>φ = (1+√5)/2</em>, with convergents F<sub>n+1</sub>/F<sub>n</sub> growing at the slowest
+    possible exponential rate, is the <strong>last torus standing</strong> as perturbation increases.
+  </div>
+
+  <!-- Panel 5: Harmonic Partial Sums -->
+  <div class="panel" id="panel5">
+    <h2>V. Harmonic Partial Sums H<sub>K</sub></h2>
+    <div class="description">
+      H<sub>K</sub> = Σ<sub>j=1</sub><sup>K</sup> 1/j vs the continuous approximation ln(K).
+      The persistent gap is γ ≈ 0.5772 (Euler-Mascheroni constant).
+    </div>
+    <canvas id="canvas5" width="660" height="320"></canvas>
+    <div class="legend">
+      <span style="background:#d4a840"></span>H<sub>K</sub> (discrete)<br>
+      <span style="background:#5a5a7a"></span>ln(K) (continuous)<br>
+      <span style="background:#6a8a5a;height:1px;border-top:1px dashed #6a8a5a"></span>gap = γ
+    </div>
+  </div>
+
+  <!-- Panel 6: Riemann Zero Density -->
+  <div class="panel" id="panel6">
+    <h2>VI. Riemann Zero Density &amp; Prime Thinning</h2>
+    <div class="description">
+      Zeros of ζ(½+it) accumulate as N(T) ~ (T/2π)ln(T/2πe).
+      Primes thin as π(x) ~ x/ln(x). Dual processes, both governed by the harmonic rate.
+    </div>
+    <canvas id="canvas6" width="660" height="320"></canvas>
+    <div class="legend">
+      <span style="background:#9a70b0"></span>Zero density: ln(t)/2π<br>
+      <span style="background:#70a090"></span>Prime density: 1/ln(x)<br>
+    </div>
+  </div>
+
+  <!-- Panel 7: Lyapunov Exponent Regimes (Full Width) -->
+  <div class="panel full-width" id="panel7">
+    <h2>VII. Lyapunov Exponent Regimes — The Three Worlds</h2>
+    <div class="description">
+      λ &lt; 0: Contracting (ordered, computationally reducible). λ &gt; 0: Expanding (chaotic, noise amplification).
+      λ = 0: Critical boundary — quasiperiodic, computationally irreducible, where the harmonic series lives.
+    </div>
+    <canvas id="canvas7" width="1340" height="300"></canvas>
+  </div>
+
+  <!-- Final Narrative -->
+  <div class="narrative">
+    <strong>The Ontological Argument:</strong> A system sustaining motion across an entropic gradient
+    <em>must</em> accumulate at the harmonic rate. The gradient doesn't equilibrate (∫σ diverges),
+    the gradient doesn't exhaust (σ decays), therefore σ(t) = 1/t — the unique fixed point.
+    This is realized concretely in KAM theory: the critical exponent τ<sub>c</sub> = n is where the
+    resonance sum becomes the harmonic series, the Lyapunov exponent is zero, and the golden-mean
+    torus — the most irrational frequency — is the last invariant structure to survive perturbation.
+    <br><br>
+    <strong>The Riemann connection:</strong> ζ(s) has its pole at s = 1, the harmonic series. The zeros on
+    Re(s) = ½ accumulate logarithmically. The primes thin logarithmically. These are dual faces of
+    the same criticality — the maximal organization compatible with sustained gradient dynamics.
+    <br><br>
+    <strong>Computational irreducibility at λ = 0:</strong> Systems at criticality generate genuine novelty
+    (not noise, not repetition) at the logarithmic rate. You cannot predict their future without simulating
+    them — which is what the universe is doing.
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// Shared utilities
+// ============================================================
+const EULER_MASCHERONI = 0.5772156649;
+const PHI = (1 + Math.sqrt(5)) / 2;
+
+function getCtx(id) {
+  const c = document.getElementById(id);
+  const dpr = window.devicePixelRatio || 1;
+  const rect = c.getBoundingClientRect();
+  c.width = rect.width * dpr;
+  c.height = rect.height * dpr;
+  const ctx = c.getContext('2d');
+  ctx.scale(dpr, dpr);
+  c.style.width = rect.width + 'px';
+  c.style.height = rect.height + 'px';
+  return { ctx, w: rect.width, h: rect.height };
+}
+
+function drawAxes(ctx, ox, oy, w, h, xlabel, ylabel) {
+  ctx.strokeStyle = '#2a2a3e';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(ox, oy - h);
+  ctx.lineTo(ox, oy);
+  ctx.lineTo(ox + w, oy);
+  ctx.stroke();
+  // labels
+  ctx.fillStyle = '#4a4a5a';
+  ctx.font = '11px Courier New';
+  ctx.textAlign = 'center';
+  ctx.fillText(xlabel, ox + w / 2, oy + 25);
+  ctx.save();
+  ctx.translate(ox - 30, oy - h / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText(ylabel, 0, 0);
+  ctx.restore();
+}
+
+function drawTick(ctx, ox, oy, x, xmax, w, label) {
+  const px = ox + (x / xmax) * w;
+  ctx.strokeStyle = '#2a2a3e';
+  ctx.beginPath();
+  ctx.moveTo(px, oy);
+  ctx.lineTo(px, oy + 4);
+  ctx.stroke();
+  ctx.fillStyle = '#3a3a4a';
+  ctx.font = '9px Courier New';
+  ctx.textAlign = 'center';
+  ctx.fillText(label, px, oy + 14);
+}
+
+function drawYTick(ctx, ox, oy, y, ymax, h, label) {
+  const py = oy - (y / ymax) * h;
+  ctx.strokeStyle = '#1a1a2e';
+  ctx.setLineDash([2, 4]);
+  ctx.beginPath();
+  ctx.moveTo(ox, py);
+  ctx.lineTo(ox + 4, py);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#3a3a4a';
+  ctx.font = '9px Courier New';
+  ctx.textAlign = 'right';
+  ctx.fillText(label, ox - 5, py + 3);
+}
+
+function plotCurve(ctx, ox, oy, w, h, xmax, ymax, fn, color, dashed) {
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.8;
+  if (dashed) ctx.setLineDash(dashed);
+  ctx.beginPath();
+  let started = false;
+  for (let px = 0; px <= w; px++) {
+    const x = (px / w) * xmax;
+    if (x < 0.01) continue;
+    const y = fn(x);
+    if (!isFinite(y) || y < 0) continue;
+    const py = oy - (y / ymax) * h;
+    if (py < oy - h - 5) continue;
+    if (!started) { ctx.moveTo(ox + px, py); started = true; }
+    else ctx.lineTo(ox + px, py);
+  }
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+// ============================================================
+// Panel 1: Entropy Production Rate
+// ============================================================
+function drawPanel1() {
+  const { ctx, w, h } = getCtx('canvas1');
+  const ox = 50, oy = h - 35, pw = w - 80, ph = h - 70;
+  const xmax = 20, ymax = 2;
+
+  drawAxes(ctx, ox, oy, pw, ph, 't', 'σ(t)');
+  for (let t = 5; t <= 20; t += 5) drawTick(ctx, ox, oy, t, xmax, pw, t.toString());
+  for (let y = 0.5; y <= 2; y += 0.5) drawYTick(ctx, ox, oy, y, ymax, ph, y.toFixed(1));
+
+  plotCurve(ctx, ox, oy, pw, ph, xmax, ymax, t => 1 / Math.pow(t, 0.6), '#c44040');
+  plotCurve(ctx, ox, oy, pw, ph, xmax, ymax, t => 1 / t, '#d4a840');
+  plotCurve(ctx, ox, oy, pw, ph, xmax, ymax, t => 1 / Math.pow(t, 1.5), '#4080c0');
+
+  // Critical label
+  ctx.fillStyle = '#d4a840';
+  ctx.font = '10px Courier New';
+  ctx.fillText('← 1/t (critical)', ox + pw * 0.35, oy - (1/5 / ymax) * ph - 8);
+}
+
+// ============================================================
+// Panel 2: Cumulative Entropy
+// ============================================================
+function drawPanel2() {
+  const { ctx, w, h } = getCtx('canvas2');
+  const ox = 50, oy = h - 35, pw = w - 80, ph = h - 70;
+  const xmax = 100, ymax = 12;
+
+  drawAxes(ctx, ox, oy, pw, ph, 'T', '∫₁ᵀ σ(t)dt');
+  for (let t = 20; t <= 100; t += 20) drawTick(ctx, ox, oy, t, xmax, pw, t.toString());
+  for (let y = 2; y <= 12; y += 2) drawYTick(ctx, ox, oy, y, ymax, ph, y.toString());
+
+  // α=0.6: T^0.4 / 0.4
+  plotCurve(ctx, ox, oy, pw, ph, xmax, ymax, T => Math.pow(T, 0.4) / 0.4 - 1/0.4, '#c44040');
+  // α=1: ln(T) + γ
+  plotCurve(ctx, ox, oy, pw, ph, xmax, ymax, T => Math.log(T) + EULER_MASCHERONI, '#d4a840');
+  // α=1.5: converges to 2 - 2/sqrt(T)
+  plotCurve(ctx, ox, oy, pw, ph, xmax, ymax, T => 2 * (1 - 1/Math.sqrt(T)), '#4080c0');
+
+  // Convergence line for α > 1
+  ctx.strokeStyle = '#4080c0';
+  ctx.setLineDash([3, 5]);
+  ctx.globalAlpha = 0.4;
+  const convY = oy - (2 / ymax) * ph;
+  ctx.beginPath();
+  ctx.moveTo(ox, convY);
+  ctx.lineTo(ox + pw, convY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.globalAlpha = 1;
+
+  ctx.fillStyle = '#4080c0';
+  ctx.font = '9px Courier New';
+  ctx.textAlign = 'left';
+  ctx.fillText('bounded ↑', ox + pw * 0.7, convY - 5);
+
+  ctx.fillStyle = '#d4a840';
+  ctx.fillText('ln(T) + γ', ox + pw * 0.65, oy - (Math.log(80) / ymax) * ph - 8);
+}
+
+// ============================================================
+// Panel 3: Resonance Sum
+// ============================================================
+let currentDim = 2;
+
+function drawPanel3() {
+  const { ctx, w, h } = getCtx('canvas3');
+  const ox = 50, oy = h - 35, pw = w - 80, ph = h - 70;
+  const Kmax = 200, ymax = 15;
+  const n = currentDim;
+
+  ctx.clearRect(0, 0, w, h);
+  drawAxes(ctx, ox, oy, pw, ph, 'K (summation limit)', 'S_K(τ, n=' + n + ')');
+  for (let k = 50; k <= 200; k += 50) drawTick(ctx, ox, oy, k, Kmax, pw, k.toString());
+  for (let y = 3; y <= 15; y += 3) drawYTick(ctx, ox, oy, y, ymax, ph, y.toString());
+
+  // τ < n: divergent (τ = n - 0.5)
+  plotCurve(ctx, ox, oy, pw, ph, Kmax, ymax, K => {
+    let s = 0;
+    for (let j = 1; j <= Math.floor(K); j++) s += Math.pow(j, n - 1 - (n - 0.5));
+    return s;
+  }, '#c44040');
+
+  // τ = n: harmonic
+  plotCurve(ctx, ox, oy, pw, ph, Kmax, ymax, K => {
+    let s = 0;
+    for (let j = 1; j <= Math.floor(K); j++) s += 1 / j;
+    return s;
+  }, '#d4a840');
+
+  // τ > n: convergent (τ = n + 1)
+  plotCurve(ctx, ox, oy, pw, ph, Kmax, ymax, K => {
+    let s = 0;
+    for (let j = 1; j <= Math.floor(K); j++) s += Math.pow(j, -2);
+    return s;
+  }, '#4080c0');
+
+  // Labels
+  ctx.fillStyle = '#c44040';
+  ctx.font = '9px Courier New';
+  ctx.textAlign = 'left';
+  ctx.fillText('τ=' + (n-0.5).toFixed(1) + ' (diverges)', ox + pw * 0.6, oy - ph * 0.85);
+
+  ctx.fillStyle = '#d4a840';
+  ctx.fillText('τ=' + n + ' (harmonic)', ox + pw * 0.55, oy - (Math.log(150) / ymax) * ph - 5);
+
+  ctx.fillStyle = '#4080c0';
+  ctx.fillText('τ=' + (n+1) + ' → π²/6', ox + pw * 0.55, oy - (1.6 / ymax) * ph - 5);
+}
+
+function setDimension(n, btn) {
+  currentDim = n;
+  document.querySelectorAll('#panel3 .controls button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  drawPanel3();
+}
+
+// ============================================================
+// Panel 4: Phase Diagram
+// ============================================================
+function drawPanel4() {
+  const { ctx, w, h } = getCtx('canvas4');
+  const ox = 50, oy = h - 35, pw = w - 80, ph = h - 70;
+  const n = 2;
+
+  drawAxes(ctx, ox, oy, pw, ph, 'τ (Diophantine exponent)', 'ε (perturbation)');
+
+  // τ range: 0.5 to 4.5
+  const tauMin = 0.5, tauMax = 4.5;
+  const epsMax = 1.2;
+
+  for (let tau = 1; tau <= 4; tau++) drawTick(ctx, ox, oy, (tau - tauMin)/(tauMax - tauMin), 1, pw, tau.toString());
+  for (let e = 0.2; e <= 1.2; e += 0.2) drawYTick(ctx, ox, oy, e/epsMax, 1, ph, e.toFixed(1));
+
+  // Fill regions
+  // Chaotic region (τ < n): red tint
+  const tauCritPx = ox + ((n - tauMin) / (tauMax - tauMin)) * pw;
+  ctx.fillStyle = 'rgba(180, 50, 50, 0.08)';
+  ctx.fillRect(ox, oy - ph, tauCritPx - ox, ph);
+
+  // Ordered region (τ > n): blue tint
+  ctx.fillStyle = 'rgba(50, 80, 160, 0.08)';
+  ctx.fillRect(tauCritPx, oy - ph, ox + pw - tauCritPx, ph);
+
+  // Critical line at τ = n
+  ctx.strokeStyle = '#d4a840';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([5, 3]);
+  ctx.beginPath();
+  ctx.moveTo(tauCritPx, oy);
+  ctx.lineTo(tauCritPx, oy - ph);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // KAM stability boundary curve (schematic)
+  ctx.strokeStyle = '#6a8a5a';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  for (let px = 0; px <= pw; px++) {
+    const tau = tauMin + (px / pw) * (tauMax - tauMin);
+    const p = tau - n + 1;
+    let eps_c;
+    if (p <= 0) {
+      eps_c = 0.01;
+    } else if (p < 1) {
+      eps_c = 0.15 * Math.pow(p, 0.8);
+    } else {
+      eps_c = 0.15 + 0.8 * (1 - Math.exp(-(p - 1) * 1.5));
+    }
+    const py = oy - (eps_c / epsMax) * ph;
+    if (px === 0) ctx.moveTo(ox + px, py);
+    else ctx.lineTo(ox + px, py);
+  }
+  ctx.stroke();
+
+  // Labels
+  ctx.fillStyle = '#c44040';
+  ctx.font = '11px Courier New';
+  ctx.textAlign = 'center';
+  ctx.fillText('CHAOTIC', ox + (tauCritPx - ox) / 2, oy - ph * 0.5);
+  ctx.font = '9px Courier New';
+  ctx.fillText('λ > 0', ox + (tauCritPx - ox) / 2, oy - ph * 0.5 + 15);
+
+  ctx.fillStyle = '#4080c0';
+  ctx.font = '11px Courier New';
+  ctx.fillText('ORDERED (KAM)', tauCritPx + (ox + pw - tauCritPx) / 2, oy - ph * 0.5);
+  ctx.font = '9px Courier New';
+  ctx.fillText('λ ≤ 0', tauCritPx + (ox + pw - tauCritPx) / 2, oy - ph * 0.5 + 15);
+
+  ctx.fillStyle = '#d4a840';
+  ctx.font = '10px Courier New';
+  ctx.save();
+  ctx.translate(tauCritPx + 12, oy - ph * 0.25);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText('τ = n (critical, λ = 0)', 0, 0);
+  ctx.restore();
+
+  // Golden ratio torus marker
+  const phiTau = n; // at critical
+  const phiEps = 0.9716; // Greene's critical value
+  const phiPx = tauCritPx;
+  const phiPy = oy - (phiEps / epsMax) * ph;
+  ctx.fillStyle = '#d4a840';
+  ctx.beginPath();
+  ctx.arc(phiPx, phiPy, 4, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#b8a88a';
+  ctx.font = '9px Courier New';
+  ctx.textAlign = 'left';
+  ctx.fillText('φ-torus breaks', phiPx + 8, phiPy - 8);
+  ctx.fillText('ε_c ≈ 0.9716', phiPx + 8, phiPy + 4);
+
+  // KAM stability label
+  ctx.fillStyle = '#6a8a5a';
+  ctx.font = '9px Courier New';
+  ctx.textAlign = 'left';
+  ctx.fillText('KAM stability boundary', ox + pw * 0.55, oy - 20);
+}
+
+// ============================================================
+// Panel 5: Harmonic Partial Sums
+// ============================================================
+function drawPanel5() {
+  const { ctx, w, h } = getCtx('canvas5');
+  const ox = 50, oy = h - 35, pw = w - 80, ph = h - 70;
+  const Kmax = 150, ymax = 6;
+
+  drawAxes(ctx, ox, oy, pw, ph, 'K', 'Value');
+  for (let k = 25; k <= 150; k += 25) drawTick(ctx, ox, oy, k, Kmax, pw, k.toString());
+  for (let y = 1; y <= 6; y++) drawYTick(ctx, ox, oy, y, ymax, ph, y.toString());
+
+  // ln(K) (continuous approximation)
+  plotCurve(ctx, ox, oy, pw, ph, Kmax, ymax, K => Math.log(K), '#5a5a7a', [4, 3]);
+
+  // H_K = Σ 1/j (discrete harmonic partial sums)
+  ctx.strokeStyle = '#d4a840';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  let H = 0;
+  for (let j = 1; j <= Kmax; j++) {
+    H += 1 / j;
+    const px = ox + (j / Kmax) * pw;
+    const py = oy - (H / ymax) * ph;
+    if (j === 1) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.stroke();
+
+  // Gap annotation at K=100
+  const H100 = (() => { let s = 0; for (let j = 1; j <= 100; j++) s += 1/j; return s; })();
+  const ln100 = Math.log(100);
+  const xp = ox + (100 / Kmax) * pw;
+  const yH = oy - (H100 / ymax) * ph;
+  const yLn = oy - (ln100 / ymax) * ph;
+
+  ctx.strokeStyle = '#6a8a5a';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([2, 2]);
+  ctx.beginPath();
+  ctx.moveTo(xp, yH);
+  ctx.lineTo(xp, yLn);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.fillStyle = '#6a8a5a';
+  ctx.font = '10px Courier New';
+  ctx.textAlign = 'left';
+  ctx.fillText('γ ≈ 0.5772', xp + 5, (yH + yLn) / 2 + 3);
+
+  // Euler-Mascheroni annotation
+  ctx.fillStyle = '#8a8aaa';
+  ctx.font = '9px Courier New';
+  ctx.fillText('(cost of discreteness)', xp + 5, (yH + yLn) / 2 + 15);
+}
+
+// ============================================================
+// Panel 6: Riemann Zero Density & Prime Thinning
+// ============================================================
+function drawPanel6() {
+  const { ctx, w, h } = getCtx('canvas6');
+  const ox = 50, oy = h - 35, pw = w - 80, ph = h - 70;
+  const xmax = 1000, ymax = 1.2;
+
+  drawAxes(ctx, ox, oy, pw, ph, 'x / t', 'density');
+  for (let x = 200; x <= 1000; x += 200) drawTick(ctx, ox, oy, x, xmax, pw, x.toString());
+  for (let y = 0.2; y <= 1.2; y += 0.2) drawYTick(ctx, ox, oy, y, ymax, ph, y.toFixed(1));
+
+  // Zero density: ln(t) / (2π), normalized
+  plotCurve(ctx, ox, oy, pw, ph, xmax, ymax, t => Math.log(t) / (2 * Math.PI), '#9a70b0');
+
+  // Prime density: 1/ln(x)
+  plotCurve(ctx, ox, oy, pw, ph, xmax, ymax, x => 1 / Math.log(x), '#70a090');
+
+  // Crossing point annotation
+  // ln(t)/(2π) = 1/ln(x) when ln²(x) = 2π → x = e^√(2π) ≈ 12.35
+  ctx.fillStyle = '#6a6a7a';
+  ctx.font = '9px Courier New';
+  ctx.textAlign = 'right';
+  ctx.fillText('zeros thicken ↗', ox + pw * 0.85, oy - ph * 0.82);
+  ctx.fillText('(logarithmically)', ox + pw * 0.85, oy - ph * 0.76);
+
+  ctx.textAlign = 'left';
+  ctx.fillText('primes thin ↘', ox + pw * 0.25, oy - (1/(Math.log(200)) / ymax) * ph - 12);
+  ctx.fillText('(logarithmically)', ox + pw * 0.25, oy - (1/(Math.log(200)) / ymax) * ph - 1);
+
+  // Dual label
+  ctx.fillStyle = '#b8a88a';
+  ctx.font = '10px Courier New';
+  ctx.textAlign = 'center';
+  ctx.fillText('DUAL PROCESSES', ox + pw * 0.5, oy - ph * 0.45);
+  ctx.font = '9px Courier New';
+  ctx.fillStyle = '#6a6a7a';
+  ctx.fillText('both governed by ln(x)', ox + pw * 0.5, oy - ph * 0.45 + 14);
+}
+
+// ============================================================
+// Panel 7: Lyapunov Regimes (Full Width)
+// ============================================================
+function drawPanel7() {
+  const { ctx, w, h } = getCtx('canvas7');
+  const oy = h - 35, ph = h - 70;
+  const zoneW = (w - 80) / 3;
+  const ox = 50;
+
+  // Three zones
+  const zones = [
+    { label: 'λ < 0', sub: 'ORDERED', color: '#4080c0', bgColor: 'rgba(50, 80, 160, 0.06)',
+      desc: ['Contracting', 'Computationally reducible', 'Attractor convergence', 'KAM tori survive'] },
+    { label: 'λ = 0', sub: 'CRITICAL', color: '#d4a840', bgColor: 'rgba(180, 140, 50, 0.08)',
+      desc: ['Harmonic accumulation', 'Computationally irreducible', 'Quasiperiodic motion', 'Golden mean torus'] },
+    { label: 'λ > 0', sub: 'CHAOTIC', color: '#c44040', bgColor: 'rgba(180, 50, 50, 0.06)',
+      desc: ['Expanding', 'Noise amplification', 'Exponential sensitivity', 'Resonance dominated'] }
+  ];
+
+  zones.forEach((zone, i) => {
+    const zx = ox + i * zoneW;
+
+    // Background
+    ctx.fillStyle = zone.bgColor;
+    ctx.fillRect(zx, oy - ph, zoneW, ph);
+
+    // Border
+    if (i > 0) {
+      ctx.strokeStyle = i === 1 ? '#d4a840' : '#2a2a3e';
+      ctx.lineWidth = i === 1 ? 2 : 1;
+      ctx.setLineDash(i === 1 ? [5, 3] : []);
+      ctx.beginPath();
+      ctx.moveTo(zx, oy);
+      ctx.lineTo(zx, oy - ph);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    if (i === 1) {
+      ctx.strokeStyle = '#d4a840';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 3]);
+      ctx.beginPath();
+      ctx.moveTo(zx + zoneW, oy);
+      ctx.lineTo(zx + zoneW, oy - ph);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // Main label
+    ctx.fillStyle = zone.color;
+    ctx.font = 'bold 16px Courier New';
+    ctx.textAlign = 'center';
+    ctx.fillText(zone.label, zx + zoneW / 2, oy - ph + 35);
+
+    ctx.font = '12px Courier New';
+    ctx.fillText(zone.sub, zx + zoneW / 2, oy - ph + 55);
+
+    // Description
+    ctx.fillStyle = '#5a5a6a';
+    ctx.font = '10px Courier New';
+    zone.desc.forEach((line, li) => {
+      ctx.fillText(line, zx + zoneW / 2, oy - ph + 85 + li * 18);
+    });
+
+    // Draw representative trajectory
+    drawTrajectory(ctx, zx + 20, oy - 40, zoneW - 40, 50, i);
+  });
+
+  // Arrow connecting the three zones
+  ctx.fillStyle = '#3a3a4a';
+  ctx.font = '9px Courier New';
+  ctx.textAlign = 'center';
+  ctx.fillText('← p > 1 (convergent) ——— p = 1 (harmonic) ——— p < 1 (divergent) →', ox + zoneW * 1.5, oy + 18);
+}
+
+function drawTrajectory(ctx, x, y, w, h, type) {
+  ctx.strokeStyle = type === 0 ? '#4080c0' : type === 1 ? '#d4a840' : '#c44040';
+  ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.6;
+  ctx.beginPath();
+
+  if (type === 0) {
+    // Contracting spiral
+    for (let t = 0; t < 100; t++) {
+      const r = 1 - t/100;
+      const angle = t * 0.2;
+      const px = x + w/2 + r * w/2.5 * Math.cos(angle);
+      const py = y + h/2 + r * h/2.5 * Math.sin(angle);
+      if (t === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+  } else if (type === 1) {
+    // Quasiperiodic (Lissajous-like)
+    for (let t = 0; t < 200; t++) {
+      const px = x + w/2 + w/3 * Math.sin(t * 0.1 * PHI);
+      const py = y + h/2 + h/2.5 * Math.cos(t * 0.1);
+      if (t === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+  } else {
+    // Chaotic (pseudo-random)
+    let cx = 0.1, cy = 0.1;
+    for (let t = 0; t < 150; t++) {
+      // Simplified Hénon-like map
+      const nx = 1 - 1.4 * cx * cx + cy;
+      const ny = 0.3 * cx;
+      cx = nx; cy = ny;
+      const px = x + w/2 + cx * w/4;
+      const py = y + h/2 + cy * h * 1.5;
+      if (t === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+  }
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  // Labels
+  ctx.fillStyle = '#3a3a4a';
+  ctx.font = '8px Courier New';
+  ctx.textAlign = 'center';
+  const labels = ['attractor', 'quasiperiodic', 'strange attractor'];
+  ctx.fillText(labels[type], x + w/2, y + h + 12);
+}
+
+// ============================================================
+// Initialize all panels
+// ============================================================
+function init() {
+  drawPanel1();
+  drawPanel2();
+  drawPanel3();
+  drawPanel4();
+  drawPanel5();
+  drawPanel6();
+  drawPanel7();
+}
+
+window.addEventListener('load', init);
+window.addEventListener('resize', init);
+</script>
+
+</body>
+</html>
